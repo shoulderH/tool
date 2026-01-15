@@ -1,96 +1,313 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>数字过滤工具</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>两位数生成器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #555;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .hint {
+            margin-top: 8px;
+            color: #888;
+            font-size: 14px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .output-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .output-section.show {
+            display: block;
+        }
+
+        .output-label {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .output-content {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+            word-break: break-all;
+            line-height: 1.6;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #333;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .count {
+            margin-top: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+            text-align: center;
+        }
+
+        .error {
+            margin-top: 15px;
+            padding: 12px;
+            background: #fee;
+            border: 1px solid #fcc;
+            border-radius: 6px;
+            color: #c33;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+    </style>
 </head>
-<body class="bg-gradient-to-r from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
-    <div class="w-full max-w-2xl bg-white rounded-xl shadow-lg p-6 space-y-6">
-        <h1 class="text-2xl font-bold text-center text-gray-800">数字过滤工具</h1>
+<body>
+    <div class="container">
+        <h1>🔢 两位数生成器</h1>
         
-        <!-- 输入区域 -->
-        <div class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">排除数字（支持点或逗号分隔，可选）：</label>
-                <input type="text" id="excludeInput" placeholder="例如: 5.06.17.20.32.37.39.45 或 5,06,17,20,32,37,39,45" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-transparent">
-            </div>
-            
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">尾号匹配（支持连字符或逗号分隔，可选）：</label>
-                <input type="text" id="matchInput" placeholder="例如: 0-1-2-3-4-5-6 或 0,1,2,3,4,5,6" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-transparent">
-            </div>
+        <div class="input-section">
+            <label for="input">请输入首位数字（可用逗号或-分隔多个数字）：</label>
+            <input type="text" id="input" placeholder="例如：1 或 1,2 或 1-3 或 0-1-2 或 0,1,2">
+            <div class="hint">💡 支持中英文逗号（，,）和连字符（-）分隔，多个连字符视为多个数字</div>
         </div>
 
-        <!-- 操作按钮 -->
-        <div class="flex justify-center">
-            <button onclick="processNumbers()" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-200 transform hover:scale-105 shadow-md">
-                <i class="fas fa-calculator mr-2"></i>计算结果
-            </button>
-        </div>
+        <button onclick="generateNumbers()">生成数字</button>
 
-        <!-- 输出区域 -->
-        <div class="mt-6">
-            <h2 class="text-lg font-semibold text-gray-700 mb-2">结果：</h2>
-            <textarea id="resultOutput" readonly class="w-full h-32 p-4 border rounded-lg bg-gray-50 resize-none"></textarea>
+        <div class="error" id="error"></div>
+
+        <div class="output-section" id="outputSection">
+            <div class="output-label">生成的数字：</div>
+            <div class="output-content" id="output"></div>
+            <div class="count" id="count"></div>
         </div>
     </div>
 
     <script>
-        function processNumbers() {
-            const excludeStr = document.getElementById('excludeInput').value;
-            const matchStr = document.getElementById('matchInput').value;
+        function generateNumbers() {
+            const input = document.getElementById('input').value.trim();
+            const errorDiv = document.getElementById('error');
+            const outputSection = document.getElementById('outputSection');
+            const outputDiv = document.getElementById('output');
+            const countDiv = document.getElementById('count');
 
-            // 解析排除数字（支持点或逗号分隔）
-            let excludeSet = new Set();
-            if (excludeStr.trim()) {
-                try {
-                    // 支持点分隔和逗号分隔
-                    const separator = excludeStr.includes('.') ? '.' : ',';
-                    excludeSet = new Set(excludeStr.split(separator).map(x => parseInt(x.trim())).filter(x => !isNaN(x)));
-                } catch (e) {
-                    alert("排除数字格式错误");
-                    return;
-                }
+            // 隐藏错误和输出
+            errorDiv.classList.remove('show');
+            outputSection.classList.remove('show');
+
+            if (!input) {
+                showError('请输入首位数字！');
+                return;
             }
 
-            // 解析匹配尾号（支持连字符或逗号分隔）
-            let matchDigits = new Set();
-            if (matchStr.trim()) {
-                try {
-                    // 支持连字符分隔和逗号分隔
-                    const separator = matchStr.includes('-') ? '-' : ',';
-                    matchDigits = new Set(matchStr.split(separator).map(x => parseInt(x.trim())).filter(x => !isNaN(x) && x >= 0 && x <= 9));
-                } catch (e) {
-                    alert("尾号匹配格式错误");
-                    return;
-                }
-            }
+            try {
+                // 处理输入：替换中文逗号为英文逗号，处理连字符范围
+                let processedInput = input
+                    .replace(/，/g, ',')  // 中文逗号替换为英文逗号
+                    .replace(/\s+/g, ''); // 移除空格
 
-            // 构建1-100数组并处理
-            const result = [];
-            for (let i = 1; i <= 49; i++) {
-                // 如果有排除数字，则过滤
-                if (excludeSet.size > 0 && excludeSet.has(i)) continue;
-                
-                // 如果有尾号匹配要求，则按尾号过滤
-                if (matchDigits.size > 0) {
-                    const lastDigit = i % 10;
-                    if (matchDigits.has(lastDigit)) {
-                        result.push(i.toString().padStart(2, '0'));
+                const numbers = new Set();
+                const parts = processedInput.split(',');
+
+                for (let part of parts) {
+                    part = part.trim();
+                    if (!part) continue;
+
+                    // 处理连字符分隔的数字
+                    if (part.includes('-')) {
+                        const digits = part.split('-');
+                        // 如果只有两个部分，且都是有效数字，则作为范围处理（如 1-3）
+                        if (digits.length === 2) {
+                            const start = parseInt(digits[0].trim());
+                            const end = parseInt(digits[1].trim());
+                            
+                            if (!isNaN(start) && !isNaN(end)) {
+                                // 有效的范围格式
+                                if (start > end) {
+                                    throw new Error(`范围起始值不能大于结束值：${part}`);
+                                }
+
+                                for (let i = start; i <= end; i++) {
+                                    if (i < 0 || i > 9) {
+                                        throw new Error(`数字必须在0-9之间：${i}`);
+                                    }
+                                    addNumbersForDigit(i, numbers);
+                                }
+                            } else {
+                                // 不是有效范围，作为多个独立数字处理
+                                for (let d of digits) {
+                                    const digit = parseInt(d.trim());
+                                    if (isNaN(digit)) {
+                                        throw new Error(`无效的数字：${d.trim()}`);
+                                    }
+                                    if (digit < 0 || digit > 9) {
+                                        throw new Error(`数字必须在0-9之间：${digit}`);
+                                    }
+                                    addNumbersForDigit(digit, numbers);
+                                }
+                            }
+                        } else {
+                            // 多个连字符，作为多个独立数字处理（如 0-1-2）
+                            for (let d of digits) {
+                                const digit = parseInt(d.trim());
+                                if (isNaN(digit)) {
+                                    throw new Error(`无效的数字：${d.trim()}`);
+                                }
+                                if (digit < 0 || digit > 9) {
+                                    throw new Error(`数字必须在0-9之间：${digit}`);
+                                }
+                                addNumbersForDigit(digit, numbers);
+                            }
+                        }
+                    } else {
+                        // 单个数字
+                        const digit = parseInt(part);
+                        if (isNaN(digit)) {
+                            throw new Error(`无效的数字：${part}`);
+                        }
+                        if (digit < 0 || digit > 9) {
+                            throw new Error(`数字必须在0-9之间：${digit}`);
+                        }
+                        addNumbersForDigit(digit, numbers);
                     }
-                } 
-                // 如果没有尾号匹配要求，则所有未被排除的数字都加入结果
-                else if (excludeSet.size === 0 || !excludeSet.has(i)) {
-                    result.push(i.toString().padStart(2, '0'));
+                }
+
+                if (numbers.size === 0) {
+                    showError('未生成任何数字，请检查输入！');
+                    return;
+                }
+
+                // 排序并输出
+                const sortedNumbers = Array.from(numbers).sort((a, b) => {
+                    // 先按首位数字排序，再按第二位数字排序
+                    const aFirst = parseInt(a[0]);
+                    const bFirst = parseInt(b[0]);
+                    if (aFirst !== bFirst) {
+                        return aFirst - bFirst;
+                    }
+                    return parseInt(a[1]) - parseInt(b[1]);
+                });
+
+                outputDiv.textContent = sortedNumbers.join(',');
+                countDiv.textContent = `总数字个数为：${sortedNumbers.length}`;
+                outputSection.classList.add('show');
+
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        function addNumbersForDigit(digit, numbers) {
+            if (digit === 0) {
+                // 0开头：01-09
+                for (let i = 1; i <= 9; i++) {
+                    numbers.add(`0${i}`);
+                }
+            } else {
+                // 1-9开头：10-19, 20-29, ...
+                for (let i = 0; i <= 9; i++) {
+                    numbers.add(`${digit}${i}`);
                 }
             }
-
-            document.getElementById('resultOutput').value = result.join(',');
         }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = '❌ ' + message;
+            errorDiv.classList.add('show');
+        }
+
+        // 支持回车键触发
+        document.getElementById('input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                generateNumbers();
+            }
+        });
     </script>
 </body>
 </html>
